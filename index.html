@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>questlog</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="questlog-window">
+        <header class="window-header">
+            <div class="header-title">
+                <span class="icon">📜</span>
+                <h1>Quest Log</h1>
+            </div>
+            <div class="window-controls">
+                <span class="hotkey-hint">ESC to close</span>
+            </div>
+        </header>
+    </div>
+
+    <main class="quest-layout">
+        <section class="quest-list-panel">
+            <div class="panel-controls">
+                <div class="panel-controls-buttons">
+                    <button class="add-button">➕</button>
+                    <button class="filter-button">📝</button>
+                    <button class="settings-button">⚙</button>
+                </div>
+                <input type="text" id="search-input" placeholder="Search quests..." class="search-input">
+            </div>
+
+            <ul class="quest-items" id="quest-items-list">
+
+            </ul>
+        </section>
+
+        <section class="quest-details-panel" id="quest-details">
+
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
