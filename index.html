@@ -1,46 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>questlog</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
     <div class="questlog-window">
-        <header class="window-header">
-            <div class="header-title">
-                <span class="icon">📜</span>
-                <h1>Quest Log</h1>
-            </div>
-            <div class="window-controls">
-                <span class="hotkey-hint">ESC to close</span>
-            </div>
-        </header>
-    </div>
+        <!-- Hotkey hint in top right corner -->
+        <div class="hotkey-hint">ESC to close</div>
 
-    <main class="quest-layout">
-        <section class="quest-list-panel">
-            <div class="panel-controls">
-                <div class="panel-controls-buttons">
-                    <button class="add-button">➕</button>
-                    <button class="filter-button">📝</button>
-                    <button class="settings-button">⚙</button>
+        <main class="quest-layout">
+            <!-- Left column (controls & quest list) -->
+            <section class="quest-list-panel">
+                <div class="panel-controls">
+                    <div class="panel-controls-buttons">
+                        <button class="icon-btn add-button" title="Add Quest">+</button>
+                        <button class="icon-btn filter-button" title="Filter Quests">⧖</button>
+                        <button class="icon-btn settings-button" title="Settings">⚙</button>
+                    </div>
+                    <input type="text" id="search-input" placeholder="Search quests..." class="search-input">
                 </div>
-                <input type="text" id="search-input" placeholder="Search quests..." class="search-input">
-            </div>
 
-            <ul class="quest-items" id="quest-items-list">
+                <ul class="quest-items" id="quest-items-list">
+                    <!-- Quest items will be dynamically added here -->
+                </ul>
+            </section>
 
-            </ul>
-        </section>
-
-        <section class="quest-details-panel" id="quest-details">
-
-        </section>
-    </main>
+            <!-- Right column (quest details) -->
+            <section class="quest-details-panel" id="quest-details">
+                <!-- Quest details will be dynamically added here -->
+            </section>
+        </main>
+    </div>
 
     <script src="app.js"></script>
 </body>
+
 </html>
