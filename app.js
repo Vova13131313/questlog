@@ -25,11 +25,14 @@ const quests = [
     }
 ];
 
+// Quest selection state
 let selectedQuestId = 1;
 
+// DOM elements
 const questListEl = document.getElementById("quest-items-list");
 const questDetailsEl = document.getElementById("quest-details");
 
+// Function to render the quest list
 function renderQuestList() {
     questListEl.innerHTML = "";
     quests.forEach(q => {
@@ -52,6 +55,7 @@ function renderQuestList() {
     });
 }
 
+// Function to render the quest details
 function renderQuestDetails() {
     const current = quests.find(q => q.id === selectedQuestId);
     if (!current) return;
@@ -86,5 +90,6 @@ function renderQuestDetails() {
     };
 }
 
+// Initial render
 renderQuestList();
 renderQuestDetails();
