@@ -1,0 +1,110 @@
+:root {
+    --bg-color: #050505;
+    --gold: #f3e06d;
+    --gold-dim: #a89a42;
+    --border-gold: #f3e06d;
+    --text-color: #f3e06d;
+    --text-muted: #b8a848;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.questlog-window {
+    width: 100vw;
+    height: 100vh;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.hotkey-hint {
+    position: absolute;
+    top: 10px;
+    right: 25px;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+/* UI grid */
+.quest-layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 25px;
+    height: 100%;
+}
+
+/* Left column */
+.quest-list-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Controls */
+.panel-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.panel-controls-buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.icon-btn {
+    background: transparent;
+    border: none;
+    color: var(--gold);
+    font-size: 26px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.icon-btn:hover {
+    transform: scale(1.15);
+    color: #fff;
+}
+
+.search-input {
+    width: 100%;
+    background: transparent;
+    border: 1.5px solid var(--border-gold);
+    border-radius: 10px;
+    padding: 8px 14px;
+    color: var(--gold);
+    font-size: 14px;
+    outline: none;
+}
+
+.search-input::placeholder {
+    color: var(--gold-dim);
+}
+
+/* Right column */
+.quest-details-panel {
+    border: 1.5px solid var(--border-gold);
+    border-radius: 12px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: rgba(243, 223, 109, 0.02);
+}
