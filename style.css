@@ -69,6 +69,11 @@ body {
     align-items: center;
 }
 
+.right-action-buttons {
+    display: flex;
+    gap: 10px;
+}
+
 .icon-btn {
     background: transparent;
     border: none;
@@ -98,6 +103,55 @@ body {
     color: var(--gold-dim);
 }
 
+/* Quest list */
+.quest-items {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+}
+
+.quest-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1.5px solid var(--border-gold);
+    border-radius: 10px;
+    padding: 12px;
+    cursor: pointer;
+    background: rgba(243, 223, 109, 0.02);
+}
+
+.quest-card:hover {
+    background: rgba(243, 223, 109, 0.1);
+}
+
+.quest-card.selected {
+    background: rgba(243, 223, 109, 0.2);
+    box-shadow: 0 0 8px rgba(243, 223, 109, 0.3);
+}
+
+.quest-card-icon {
+    font-size: 28px;
+}
+
+.quest-card-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.quest-card-title {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.quest-card-timer {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
 /* Right column */
 .quest-details-panel {
     border: 1.5px solid var(--border-gold);
@@ -107,4 +161,70 @@ body {
     flex-direction: column;
     justify-content: space-between;
     background: rgba(243, 223, 109, 0.02);
+}
+
+.details-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 12px;
+    border-bottom: 1.5px solid var(--border-gold);
+}
+
+.details-title {
+    font-size: 26px;
+    font-weight: 500;
+    text-align: center;
+    flex: 1;
+}
+
+.header-spacer {
+    width: 26px;
+}
+
+.edit-btn {
+    font-size: 20px;
+}
+
+.details-body {
+    flex: 1;
+    padding: 20px;
+    font-size: 18px;
+    line-height: 1.5;
+}
+
+.details-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 15px;
+}
+
+.quest-category {
+    font-size: 15px;
+    color: var(--gold);
+}
+
+.track-btn {
+    width: 300px;
+    background: transparent;
+    border: 1.5px solid var(--border-gold);
+    border-radius: 10px;
+    color: var(--gold);
+    padding: 10px 28px;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.track-btn:hover {
+    background: var(--gold);
+    color: var(--bg-color);
+    font-weight: 600;
+}
+
+.quest-timer-details {
+    text-align: right;
+    font-size: 14px;
+    color: var(--gold);
 }
