@@ -38,7 +38,7 @@ function renderQuestList() {
     quests.forEach(q => {
         const icon = categoryIcons[q.category] || "?";
         const li = document.createElement("li");
-        li.className = "quest-card ${q.id === selectedQuestId ? 'selected' : ''}";
+        li.className = `quest-card ${q.id === selectedQuestId ? 'selected' : ''}`;
         li.innerHTML = `
             <div class="quest-card-icon">${icon}</div>
             <div class="quest-card-info">
@@ -93,3 +93,14 @@ function renderQuestDetails() {
 // Initial render
 renderQuestList();
 renderQuestDetails();
+
+// Handle Escape key to close the window
+if (window.require) {
+    const { ipcRenderer } = window.require('electron');
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            ipcRenderer.send('hide-window');
+        }
+    });
+}

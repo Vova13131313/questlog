@@ -1,0 +1,25 @@
+{
+  "name": "questlog",
+  "version": "1.0.0",
+  "description": "Quest Log Overlay",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vova13131313/questlog.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Vova13131313/questlog/issues"
+  },
+  "homepage": "https://github.com/Vova13131313/questlog#readme",
+  "devDependencies": {
+    "electron": "^45.2.1"
+  }
+}
