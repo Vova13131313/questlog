@@ -1,9 +1,3 @@
-// Sample data for quests and categories
-const categoryIcons = {
-    "Category 1": "📖",
-    "Category 2": "🎮"
-};
-
 const console = require('console');
 
 // Node.js modules
@@ -11,20 +5,47 @@ const fs = require('fs');
 const path = require('path');
 
 // Quests file path
-const DB_PATH = path.join(__dirname, 'data/quests.json');
+const QUESTS_PATH = path.join(__dirname, 'data/quests.json');
+const CATEGORIES_PATH = path.join(__dirname, 'data/categories.json');
 
 let quests = [];
+let categoryIcons = {};
 let selectedQuestId = 1;
 
 // DOM elements
 const questListEl = document.getElementById("quest-items-list");
 const questDetailsEl = document.getElementById("quest-details");
 
+// Read categories from json
+function loadCategoriesFromFile() {
+    try {
+        if (fs.existsSync(CATEGORIES_PATH)) {
+            const rawData = fs.readFileSync(CATEGORIES_PATH, 'utf-8');
+            categoryIcons = JSON.parse(rawData);
+        } else {
+            categoryIcons = {};
+            saveCategoriesToFile();
+        }
+    } catch (error) {
+        console.error("Error while reading categories.json: ", error);
+        categoryIcons = {};
+    }
+}
+
+// Save categories to json
+function saveCategoriesToFile() {
+    try {
+        fs.writeFileSync(CATEGORIES_PATH, JSON.stringify(categoryIcons, null, 2), 'utf-8');
+    } catch (error) {
+        console.error("Error saving to categories.json: ", error);
+    }
+}
+
 // Read quests from json
 function loadQuestsFromFile() {
     try {
-        if (fs.existsSync(DB_PATH)) {
-            const rawData = fs.readFileSync(DB_PATH, 'utf-8');
+        if (fs.existsSync(QUESTS_PATH)) {
+            const rawData = fs.readFileSync(QUESTS_PATH, 'utf-8');
             quests = JSON.parse(rawData);
         } else {
             quests = [];
@@ -39,7 +60,7 @@ function loadQuestsFromFile() {
 // Save quests to json
 function saveQuestsToFile() {
     try {
-        fs.writeFileSync(DB_PATH, JSON.stringify(quests, null, 2), 'utf-8');
+        fs.writeFileSync(QUESTS_PATH, JSON.stringify(quests, null, 2), 'utf-8');
     } catch (error) {
         console.error("Error saving to quests.json: ", error);
     }
@@ -105,10 +126,13 @@ function renderQuestDetails() {
 }
 
 // Initialization
+loadCategoriesFromFile();
 loadQuestsFromFile();
+
 if (quests.length > 0 && !quests.some(q => q.id === selectedQuestId)) {
     selectedQuestId = quests[0].id;
 }
+
 renderQuestList();
 renderQuestDetails();
 
