@@ -13,4 +13,4 @@ Thumbs.db
 .idea/
 
 # Quests data file
-quests-data.json
+data/quests.json

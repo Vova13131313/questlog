@@ -4,33 +4,46 @@ const categoryIcons = {
     "Category 2": "🎮"
 };
 
-const quests = [
-    {
-        id: 1,
-        title: "Quest title 1",
-        description: "Quest description 1",
-        category: "Category 1",
-        deadline: "02.11.2026",
-        timeLeft: "1 day left",
-        isTracked: true
-    },
-    {
-        id: 2,
-        title: "Quest title 2",
-        description: "Quest description 2",
-        category: "Category 2",
-        deadline: "03.11.2026",
-        timeLeft: "2 days left",
-        isTracked: false
-    }
-];
+const console = require('console');
 
-// Quest selection state
+// Node.js modules
+const fs = require('fs');
+const path = require('path');
+
+// Quests file path
+const DB_PATH = path.join(__dirname, 'data/quests.json');
+
+let quests = [];
 let selectedQuestId = 1;
 
 // DOM elements
 const questListEl = document.getElementById("quest-items-list");
 const questDetailsEl = document.getElementById("quest-details");
+
+// Read quests from json
+function loadQuestsFromFile() {
+    try {
+        if (fs.existsSync(DB_PATH)) {
+            const rawData = fs.readFileSync(DB_PATH, 'utf-8');
+            quests = JSON.parse(rawData);
+        } else {
+            quests = [];
+            saveQuestsToFile();
+        }
+    } catch (error) {
+        console.error("Error while reading quests.json: ", error);
+        quests = [];
+    }
+}
+
+// Save quests to json
+function saveQuestsToFile() {
+    try {
+        fs.writeFileSync(DB_PATH, JSON.stringify(quests, null, 2), 'utf-8');
+    } catch (error) {
+        console.error("Error saving to quests.json: ", error);
+    }
+}
 
 // Function to render the quest list
 function renderQuestList() {
@@ -86,11 +99,16 @@ function renderQuestDetails() {
 
     document.getElementById("track-btn").onclick = () => {
         current.isTracked = !current.isTracked;
+        saveQuestsToFile();
         renderQuestDetails();
     };
 }
 
-// Initial render
+// Initialization
+loadQuestsFromFile();
+if (quests.length > 0 && !quests.some(q => q.id === selectedQuestId)) {
+    selectedQuestId = quests[0].id;
+}
 renderQuestList();
 renderQuestDetails();
 

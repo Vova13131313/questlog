@@ -41,7 +41,7 @@ app.whenReady().then(() => {
         console.log('Hotkey registration failed');
     }
 
-    tray = new Tray(path.join(__dirname, 'icon.png'));
+    tray = new Tray(path.join(__dirname, '/assets/icon.png'));
     const contextMenu = Menu.buildFromTemplate([
         { label: 'Open questlog', click: () => mainWindow.show() },
         { type: 'separator' },
