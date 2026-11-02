@@ -71,13 +71,16 @@ function renderQuestList() {
     questListEl.innerHTML = "";
     quests.forEach(q => {
         const icon = categoryIcons[q.category] || "?";
+        const formattedDeadline = formatDeadlineDisplay(q.deadline);
+        const timeLeftStr = getFormattedTimeLeft(q.deadline);
+
         const li = document.createElement("li");
         li.className = `quest-card ${q.id === selectedQuestId ? 'selected' : ''}`;
         li.innerHTML = `
             <div class="quest-card-icon">${icon}</div>
             <div class="quest-card-info">
                 <div class="quest-card-title">${q.title}</div>
-                <div class="quest-card-timer">Time left: ${q.timeLeft}</div>
+                <div class="quest-card-timer">${formattedDeadline}; ${timeLeftStr}</div>
             </div>
         `;
         li.onclick = () => {
@@ -93,6 +96,9 @@ function renderQuestList() {
 function renderQuestDetails() {
     const current = quests.find(q => q.id === selectedQuestId);
     if (!current) return;
+
+        const formattedDeadline = formatDeadlineDisplay(current.deadline);
+        const timeLeftStr = getFormattedTimeLeft(current.deadline);
 
     questDetailsEl.innerHTML = `
         <div>
@@ -112,8 +118,8 @@ function renderQuestDetails() {
                 ${current.isTracked ? "Untrack" : "Track"}
             </button>
             <div class="quest-timer-details">
-                <div>Deadline: ${current.deadline}</div>
-                <div>Time left: ${current.timeLeft}</div>
+                <div>Deadline: ${formattedDeadline}</div>
+                <div>Time left: ${timeLeftStr}</div>
             </div>
         </div>
     `;
@@ -123,6 +129,46 @@ function renderQuestDetails() {
         saveQuestsToFile();
         renderQuestDetails();
     };
+}
+
+// Formatting time left
+function getFormattedTimeLeft(deadlineStr) {
+    if (!deadlineStr) return "No deadline";
+
+    const now = new Date();
+    const deadline = new Date(deadlineStr);
+    const diffMs = deadline - now;
+
+    if (diffMs <= 0) {
+        return "Expired";
+    }
+
+    const totalMinutes = Math.floor(diffMs / (1000 * 60));
+    const days = Math.floor(totalMinutes / (60 * 24));
+    const hours = Math.floor((totalMinutes % (60 * 24) / 60));
+    const minutes = totalMinutes % 60;
+
+    const parts = [];
+    if (days > 0) parts.push(`${days}d`);
+    if (hours > 0 || days > 0) parts.push(`${hours}h`);
+    parts.push(`${minutes}m`);
+
+    return parts.join(" ");
+}
+
+// Formatting date & time
+function formatDeadlineDisplay(deadlineStr) {
+    if (!deadlineStr) return "-";
+    const d = new Date(deadlineStr);
+    if (isNaN(d.getTime())) return deadlineStr;
+
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+
+    return `${day}.${month}.${year} ${hours}:${minutes}`;
 }
 
 // Initialization
@@ -135,6 +181,12 @@ if (quests.length > 0 && !quests.some(q => q.id === selectedQuestId)) {
 
 renderQuestList();
 renderQuestDetails();
+
+// Updating timers every minute
+setInterval(() => {
+    renderQuestList();
+    renderQuestDetails();
+}, 60000)
 
 // Handle Escape key to close the window
 if (window.require) {
