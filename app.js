@@ -1,5 +1,3 @@
-const console = require('console');
-
 // Node.js modules
 const fs = require('fs');
 const path = require('path');
@@ -187,6 +185,33 @@ setInterval(() => {
     renderQuestList();
     renderQuestDetails();
 }, 60000)
+
+// Dropdown menu
+const addBtn = document.getElementById("add-btn");
+const addDropdown = document.getElementById("add-dropdown");
+const btnCreateCategory = document.getElementById("btn-create-category");
+const btnCreateQuest = document.getElementById("btn-create-quest");
+
+addBtn.onclick = (e) => {
+    e.stopPropagation();
+    addDropdown.classList.toggle("show");
+};
+
+document.addEventListener("click", (e) => {
+    if (!addDropdown.contains(e.target) && e.target !== addBtn) {
+        addDropdown.classList.remove("show");
+    }
+});
+
+btnCreateCategory.onclick = () => {
+    addDropdown.classList.remove("show");
+    console.log("Button clicked: Add category");
+};
+
+btnCreateQuest.onclick = () => {
+    addDropdown.classList.remove("show");
+    console.log("Button clicked: Add quest");
+};
 
 // Handle Escape key to close the window
 if (window.require) {

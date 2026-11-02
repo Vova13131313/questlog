@@ -19,7 +19,18 @@
             <section class="quest-list-panel">
                 <div class="panel-controls">
                     <div class="panel-controls-buttons">
-                        <button class="icon-btn add-button" title="Add Quest">+</button>
+                        <div class="dropdown-container">
+                            <button class="icon-btn add-button" id="add-btn" title="Add...">+</button>
+                            <div class="dropdown-menu" id="add-dropdown">
+                                <button class="dropdown-item" id="btn-create-category">
+                                    <span class="dropdown-icon">🏷️</span> Add category
+                                </button>
+                                <button class="dropdown-item" id="btn-create-quest">
+                                    <span class="dropdown-icon">📜</span> Add quest
+                                </button>
+                            </div>
+                        </div>
+
                         <div class="right-action-buttons">
                             <button class="icon-btn filter-button" title="Filter Quests">⧖</button>
                             <button class="icon-btn settings-button" title="Settings">⚙</button>
