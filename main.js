@@ -18,10 +18,11 @@ function createWindow() {
             contextIsolation: false
         }
     });
+
+    mainWindow.setAlwaysOnTop(true, 'screen-saver');
     
     mainWindow.maximize();
-    mainWindow.loadFile('index.html');
-    mainWindow.on('blur', () => {})
+    mainWindow.loadFile('index.html')
 }
 
 app.whenReady().then(() => {
@@ -29,6 +30,8 @@ app.whenReady().then(() => {
 
     const shortcut = 'Alt+Q';
     const ret = globalShortcut.register(shortcut, () => {
+        if (!mainWindow) return;
+
         if (mainWindow.isVisible()) {
             mainWindow.hide();
         } else {
