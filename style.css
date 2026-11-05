@@ -325,6 +325,29 @@ body {
     color: var(--gold-dim);
 }
 
+textarea.form-input {
+    height: 120px;
+    padding: 10px 14px;
+    resize: vertical;
+    font-family: inherit;
+}
+
+select.form-input {
+    cursor: pointer;
+    background-color: var(--bg-color);
+}
+
+select.form-input option {
+    background-color: #121316;
+    color: var(--gold);
+    padding: 8px;
+}
+
+input[type="datetime-local"].form-input {
+    color-scheme: dark;
+    cursor: pointer;
+}
+
 .file-input-wrapper {
     position: relative;
     display: flex;

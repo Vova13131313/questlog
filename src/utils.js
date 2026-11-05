@@ -38,7 +38,23 @@ function formatDeadlineDisplay(deadlineStr) {
     return `${day}.${month}.${year} ${hours}:${minutes}`;
 }
 
+// Default deadline
+function getDefaultDeadlineString() {
+    const d = new Date();
+    d.setHours(d.getHours() + 1);
+    d.setMinutes(0);
+
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
 module.exports = {
     getFormattedTimeLeft,
-    formatDeadlineDisplay
+    formatDeadlineDisplay,
+    getDefaultDeadlineString
 };

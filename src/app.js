@@ -7,7 +7,8 @@ const {
 
 const {
     getFormattedTimeLeft,
-    formatDeadlineDisplay
+    formatDeadlineDisplay,
+    getDefaultDeadlineString
 } = require('./src/utils');
 
 let quests = [];
@@ -203,7 +204,7 @@ function renderCategoryCreateForm() {
 
         if (typeEmoji.checked) {
             const emoji = document.getElementById("category-emoji-input").value.trim();
-            if (emoji != "") {
+            if (emoji) {
                 categoryIcons[name] = emoji;
                 saveCategoriesToFile(categoryIcons);
                 renderQuestDetails();
@@ -226,6 +227,118 @@ function renderCategoryCreateForm() {
                 showError("Choose image file")
             }
         }
+    };
+}
+
+// Create quest form
+function renderQuestCreateForm() {
+    isFormOpen = true;
+
+    const categoryNames = Object.keys(categoryIcons);
+    let categoryOptionsHtml = "";
+
+    if (categoryNames.length === 0) {
+        categoryOptionsHtml = `<option value="">No categories created</option>`;
+    } else {
+        categoryNames.forEach(category => {
+            categoryOptionsHtml += `<option value="${category}">${category}</option>`;
+        });
+    }
+
+    const defaultDeadline = getDefaultDeadlineString();
+
+    questDetailsEl.innerHTML = `
+        <div class="form-container">
+            <div>
+                <div class="details-header">
+                    <div class="header-spacer"></div>
+                    <h2 class="details-title">New Quest</h2>
+                    <div class="header-spacer"></div>
+                </div>
+
+                <div class="details-body" style="display: flex; flex-direction: column; gap: 16px;">
+                    <div class="form-group">
+                        <label class="form-label">Quest title</label>
+                        <input type="text" id="quest-title-input" class="form-input" placeholder="Quest title...">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <textarea id="quest-description-input" class="form-input" placeholder="Quest details and steps..."></textarea>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="form-group">
+                            <label class="form-label">Category</label>
+                            <select id="quest-category-select" class="form-input">
+                                ${categoryOptionsHtml}
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Deadline</label>
+                            <input type="datetime-local" id="quest-deadline-input" class="form-input" value="${defaultDeadline}">
+                        </div>
+                    </div>
+
+                    <div id="quest-form-error-msg" class="form-error"></div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button class="track-btn" id="save-quest-btn">Save</button>
+                <button class="btn-secondary" id="cancel-quest-btn">Calcel</button>
+            </div>
+        </div>
+    `;
+
+    const errorMsg = document.getElementById("quest-form-error-msg");
+
+    function showError(text) {
+        errorMsg.textContent = text;
+        errorMsg.style.display = "block";
+    }
+
+    // Cancel
+    document.getElementById("cancel-quest-btn").onclick = () => {
+        renderQuestDetails();
+    };
+
+    // Save
+    document.getElementById("save-quest-btn").onclick = () => {
+        const title = document.getElementById("quest-title-input").value.trim();
+        const description = document.getElementById("quest-description-input").value.trim();
+        const category = document.getElementById("quest-category-select").value;
+        const deadline = document.getElementById("quest-deadline-input").value;
+
+        if (!title) {
+            showError("Enter a quest title");
+            return;
+        }
+
+        if (!category) {
+            showError("Create a category first");
+        }
+
+        if (!deadline) {
+            showError("Set a deadline date and time");
+        }
+
+        const newQuest = {
+            id: Date.now(),
+            title: title,
+            description: description,
+            category: category,
+            deadline: deadline,
+            isTracked: false
+        };
+
+        quests.push(newQuest);
+        saveQuestsToFile(quests);
+
+        selectedQuestId = newQuest.id;
+        renderQuestList();
+        renderQuestDetails();
     };
 }
 
@@ -272,7 +385,7 @@ btnCreateCategory.onclick = () => {
 
 btnCreateQuest.onclick = () => {
     addDropdown.classList.remove("show");
-    console.log("Button clicked: Add quest");
+    renderQuestCreateForm();
 };
 
 // Handle Escape key to close the window
