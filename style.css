@@ -240,8 +240,43 @@ body {
     width: 26px;
 }
 
+/* Edit button */
 .edit-btn {
     font-size: 20px;
+}
+
+.edit-dropdown-container {
+    position: relative;
+    display: inline-block;
+}
+
+.edit-dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 6px;
+    background: rgba(15, 15, 15, 0.95);
+    border: 1.5px solid var(--border-gold);
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+    z-index: 100;
+    min-width: 140px;
+    overflow: hidden;
+}
+
+.edit-dropdown-menu.show {
+    display: flex;
+    flex-direction: column;
+}
+
+.dropdown-item.delete-item {
+    color: #ff5555;
+}
+
+.dropdown-item.delete-item:hover {
+    background: rgba(255, 85, 85, 0.15);
+    color: #ff7777;
 }
 
 .details-body {

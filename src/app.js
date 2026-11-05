@@ -52,18 +52,33 @@ function renderQuestList() {
 
 // Function to render the quest details
 function renderQuestDetails() {
+    isFormOpen = false;
     const current = quests.find(q => q.id === selectedQuestId);
-    if (!current) return;
+    if (!current) {
+        questDetailsEl.innerHTML = `<div style="text-align: center; color: var(--text-muted); margin-top: 50px;">Select a quest er create a new one</div>`;
+        return;
+    }
 
-        const formattedDeadline = formatDeadlineDisplay(current.deadline);
-        const timeLeftStr = getFormattedTimeLeft(current.deadline);
+    const formattedDeadline = formatDeadlineDisplay(current.deadline);
+    const timeLeftStr = getFormattedTimeLeft(current.deadline);
 
     questDetailsEl.innerHTML = `
         <div>
             <div class="details-header">
-            <div class="header-spacer"></div>
+                <div class="header-spacer"></div>
                 <h2 class="details-title">${current.title}</h2>
-                <button class="icon-btn edit-btn" title="Edit quest">🖉</button>
+
+                <div class="edit-dropdown-container">
+                    <button class="icon-btn edit-btn" id="edit-menu-btn" title="Edit quest">🖉</button>
+                    <div class="edit-dropdown-menu" id="edit-dropdown">
+                        <button class="dropdown-item" id="btn-edit-quest-option">
+                            <span class="dropdown-icon">✏️</span> Edit
+                        </button>
+                        <button class="dropdown-item delete-item" id="btn-delete-quest-option">
+                            <span class="dropdown-icon">🗑️</span> Delete
+                        </button>
+                    </div>
+                </div>
             </div>
             <div class="details-body">
                 <p>${current.description}</p>
@@ -87,6 +102,49 @@ function renderQuestDetails() {
         saveQuestsToFile(quests);
         renderQuestDetails();
     };
+
+    const editMenuBtn = document.getElementById("edit-menu-btn");
+    const editDropdown = document.getElementById("edit-dropdown");
+    const btnEditOption = document.getElementById("btn-edit-quest-option");
+    const btnDeleteOption = document.getElementById("btn-delete-quest-option");
+
+    editMenuBtn.onclick = (e) => {
+        e.stopPropagation();
+        editDropdown.classList.toggle("show");
+    };
+
+    document.addEventListener("click", (e) => {
+        if (editDropdown && !editDropdown.contains(e.target) && e.target !== editMenuBtn) {
+            editDropdown.classList.remove("show");
+        }
+    });
+
+    btnEditOption.onclick = () => {
+        editDropdown.classList.remove("show");
+        renderQuestCreateForm(current);
+    };
+
+    btnDeleteOption.onclick = () => {
+        editDropdown.classList.remove("show");
+        if (confirm(`Are you sure you want to delete quest "${current.title}"?`)) {
+            deleteQuest(current.id);
+        }
+    };
+}
+
+// Delete quest function
+function deleteQuest(questId) {
+    quests = quests.filter(q => q.id !== questId);
+    saveQuestsToFile(quests);
+
+    if (quests.length > 0) {
+        selectedQuestId = quests[0].id;
+    } else {
+        selectedQuestId = null;
+    }
+
+    renderQuestList();
+    renderQuestDetails();
 }
 
 // Create category form
@@ -231,7 +289,7 @@ function renderCategoryCreateForm() {
 }
 
 // Create quest form
-function renderQuestCreateForm() {
+function renderQuestCreateForm(questToEdit = null) {
     isFormOpen = true;
 
     const categoryNames = Object.keys(categoryIcons);
@@ -245,26 +303,29 @@ function renderQuestCreateForm() {
         });
     }
 
-    const defaultDeadline = getDefaultDeadlineString();
+    const formTitle = questToEdit ? "Edit Quest" : "New Quest";
+    const initialTitle = questToEdit ? questToEdit.title : "";
+    const initialDescription = questToEdit ? questToEdit.description : "";
+    const initialDeadline = questToEdit ? questToEdit.deadline : getDefaultDeadlineString();
 
     questDetailsEl.innerHTML = `
         <div class="form-container">
             <div>
                 <div class="details-header">
                     <div class="header-spacer"></div>
-                    <h2 class="details-title">New Quest</h2>
+                    <h2 class="details-title">${formTitle}</h2>
                     <div class="header-spacer"></div>
                 </div>
 
                 <div class="details-body" style="display: flex; flex-direction: column; gap: 16px;">
                     <div class="form-group">
                         <label class="form-label">Quest title</label>
-                        <input type="text" id="quest-title-input" class="form-input" placeholder="Quest title...">
+                        <input type="text" id="quest-title-input" class="form-input" value="${initialTitle}" placeholder="Quest title...">
                     </div>
 
                     <div class="form-group">
                         <label class="form-label">Description</label>
-                        <textarea id="quest-description-input" class="form-input" placeholder="Quest details and steps..."></textarea>
+                        <textarea id="quest-description-input" class="form-input" placeholder="Quest details and steps...">${initialDescription}</textarea>
                     </div>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
@@ -277,7 +338,7 @@ function renderQuestCreateForm() {
 
                         <div class="form-group">
                             <label class="form-label">Deadline</label>
-                            <input type="datetime-local" id="quest-deadline-input" class="form-input" value="${defaultDeadline}">
+                            <input type="datetime-local" id="quest-deadline-input" class="form-input" value="${initialDeadline}">
                         </div>
                     </div>
 
@@ -287,7 +348,7 @@ function renderQuestCreateForm() {
 
             <div class="form-actions">
                 <button class="track-btn" id="save-quest-btn">Save</button>
-                <button class="btn-secondary" id="cancel-quest-btn">Calcel</button>
+                <button class="btn-secondary" id="cancel-quest-btn">Cancel</button>
             </div>
         </div>
     `;
@@ -318,25 +379,34 @@ function renderQuestCreateForm() {
 
         if (!category) {
             showError("Create a category first");
+            return;
         }
 
         if (!deadline) {
             showError("Set a deadline date and time");
+            return;
         }
 
-        const newQuest = {
-            id: Date.now(),
-            title: title,
-            description: description,
-            category: category,
-            deadline: deadline,
-            isTracked: false
-        };
+        if (questToEdit) {
+            questToEdit.title = title;
+            questToEdit.description = description;
+            questToEdit.category = category;
+            questToEdit.deadline = deadline;
+            selectedQuestId = questToEdit.id;
+        } else {
+            const newQuest = {
+                id: Date.now(),
+                title: title,
+                description: description,
+                category: category,
+                deadline: deadline,
+                isTracked: false
+            };
+            quests.push(newQuest);
+            selectedQuestId = newQuest.id;
+        }
 
-        quests.push(newQuest);
         saveQuestsToFile(quests);
-
-        selectedQuestId = newQuest.id;
         renderQuestList();
         renderQuestDetails();
     };
