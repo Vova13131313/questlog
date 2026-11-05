@@ -14,7 +14,7 @@ const {
 let quests = [];
 let categoryIcons = {};
 let selectedQuestId = 1;
-let isFormOpen = false;
+let isTimerUpdatingAllowed = true;
 
 // DOM elements
 const questListEl = document.getElementById("quest-items-list");
@@ -52,7 +52,7 @@ function renderQuestList() {
 
 // Function to render the quest details
 function renderQuestDetails() {
-    isFormOpen = false;
+    isTimerUpdatingAllowed = true;
     const current = quests.find(q => q.id === selectedQuestId);
     if (!current) {
         questDetailsEl.innerHTML = `<div style="text-align: center; color: var(--text-muted); margin-top: 50px;">Select a quest er create a new one</div>`;
@@ -119,17 +119,34 @@ function renderQuestDetails() {
         }
     });
 
+    let isConfirmingDelete = false;
+
     btnEditOption.onclick = () => {
         editDropdown.classList.remove("show");
         renderQuestCreateForm(current);
     };
 
-    btnDeleteOption.onclick = () => {
-        editDropdown.classList.remove("show");
-        if (confirm(`Are you sure you want to delete quest "${current.title}"?`)) {
+    btnDeleteOption.onclick = (e) => {
+        e.stopPropagation();
+
+        if (!isConfirmingDelete) {
+            isConfirmingDelete = true;
+            btnDeleteOption.innerHTML = `<span class="dropdown-icon">⚠️</span> Are you sure?`
+            btnDeleteOption.classList.add("confirm-delete")
+        } else {
+            editDropdown.classList.remove("show");
             deleteQuest(current.id);
         }
     };
+
+    document.addEventListener("click", (e) => {
+        if (editDropdown && !editDropdown.contains(e.target) && e.target !== editMenuBtn) {
+            editDropdown.classList.remove("show");
+            isConfirmingDelete = false;
+            btnDeleteOption.innerHTML = `<span class="dropdown-icon">🗑️</span> Delete`;
+            btnDeleteOption.classList.remove("confirm-delete");
+        }
+    });
 }
 
 // Delete quest function
@@ -149,7 +166,7 @@ function deleteQuest(questId) {
 
 // Create category form
 function renderCategoryCreateForm() {
-    isFormOpen = true;
+    isTimerUpdatingAllowed = false;
 
     questDetailsEl.innerHTML = `
         <div class="form-container">
@@ -290,7 +307,7 @@ function renderCategoryCreateForm() {
 
 // Create quest form
 function renderQuestCreateForm(questToEdit = null) {
-    isFormOpen = true;
+    isTimerUpdatingAllowed = false;
 
     const categoryNames = Object.keys(categoryIcons);
     let categoryOptionsHtml = "";
@@ -426,7 +443,7 @@ renderQuestDetails();
 // Updating timers every minute
 setInterval(() => {
     renderQuestList();
-    if (!isFormOpen) {
+    if (isTimerUpdatingAllowed) {
         renderQuestDetails();
     }
 }, 60000)
