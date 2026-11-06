@@ -214,6 +214,41 @@ body {
     box-shadow: 0 0 8px rgba(243, 223, 109, 0.3);
 }
 
+.quest-card.completed {
+    opacity: 0.5;
+    filter: grayscale(0.5);
+    border-color: var(--gold-dim);
+}
+
+.quest-card.completed .quest-card-title {
+    text-decoration: line-through;
+}
+
+.quest-card.tracked {
+    border-color: var(--gold);
+    box-shadow: 0 0 6px rgba(243, 223, 109, 0.02);
+}
+
+.quest-status-badge {
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 6px;
+    display: inline-block;
+}
+
+.badge-tracked {
+    background: rgba(243, 223, 109, 0.02);
+    color: var(--gold);
+    border: 1px solid var(--gold-dim);
+}
+
+.badge-completed {
+    background: rgba(80, 200, 120, 0.2);
+    color: #50c878;
+    border: 1px solid #50c878;
+}
+
 .quest-card-icon {
     font-size: 28px;
 }
@@ -324,6 +359,12 @@ body {
     justify-self: start;
 }
 
+.footer-actions-group {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
 .track-btn {
     width: 300px;
     background: transparent;
@@ -339,6 +380,22 @@ body {
 
 .track-btn:hover {
     background: var(--gold);
+    color: var(--bg-color);
+}
+
+.complete-btn {
+    background: transparent;
+    border: 1.5px solid #50c878;
+    border-radius: 10px;
+    color: #50c878;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.complete-btn:hover {
+    background: #50c878;
     color: var(--bg-color);
 }
 

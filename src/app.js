@@ -20,10 +20,21 @@ let isTimerUpdatingAllowed = true;
 const questListEl = document.getElementById("quest-items-list");
 const questDetailsEl = document.getElementById("quest-details");
 
+// Sorting quests
+function getSortedQuests() {
+    const priority = { 'tracked': 1, 'untracked': 2, 'completed': 3 };
+    return [...quests].sort((a, b) => {
+        return priority[a.status] - priority[b.status];
+    });
+}
+
 // Function to render the quest list
 function renderQuestList() {
     questListEl.innerHTML = "";
-    quests.forEach(q => {
+    const sortedQuests = getSortedQuests();
+
+    sortedQuests.forEach(q => {
+        const status = q.status;
         const iconVal = categoryIcons[q.category] || "?";
         const iconHtml = (iconVal.startsWith('data:') || iconVal.includes('.'))
             ? `<img src="${iconVal}" style="width: 28px; height: 28px; object-fit: contain;">`
@@ -32,12 +43,19 @@ function renderQuestList() {
         const formattedDeadline = formatDeadlineDisplay(q.deadline);
         const timeLeftStr = getFormattedTimeLeft(q.deadline);
 
+        let badgeHtml = "";
+        if (status === 'tracked') {
+            badgeHtml = `<span class="quest-status-badge badge-tracked">Tracked</span>`;
+        } else if (status === 'completed') {
+            badgeHtml = `<span class="quest-status-badge badge-completed">Completed</span>`;
+        }
+
         const li = document.createElement("li");
-        li.className = `quest-card ${q.id === selectedQuestId ? 'selected' : ''}`;
+        li.className = `quest-card ${status} ${q.id === selectedQuestId ? 'selected' : ''}`;
         li.innerHTML = `
             <div class="quest-card-icon">${iconHtml}</div>
             <div class="quest-card-info">
-                <div class="quest-card-title">${q.title}</div>
+                <div class="quest-card-title">${q.title} ${badgeHtml}</div>
                 <div class="quest-card-timer">${formattedDeadline}; ${timeLeftStr}</div>
             </div>
         `;
@@ -55,12 +73,27 @@ function renderQuestDetails() {
     isTimerUpdatingAllowed = true;
     const current = quests.find(q => q.id === selectedQuestId);
     if (!current) {
-        questDetailsEl.innerHTML = `<div style="text-align: center; color: var(--text-muted); margin-top: 50px;">Select a quest er create a new one</div>`;
+        questDetailsEl.innerHTML = `<div style="text-align: center; color: var(--text-muted); margin-top: 50px;">Select a quest or create a new one</div>`;
         return;
     }
 
+    const status = current.status;
     const formattedDeadline = formatDeadlineDisplay(current.deadline);
     const timeLeftStr = getFormattedTimeLeft(current.deadline);
+
+    let actionButtonsHtml = "";
+    if (status === 'untracked') {
+        actionButtonsHtml = `<button class="track-btn" id="btn-action-track">Track</button>`;
+    } else if (status === 'tracked') {
+        actionButtonsHtml = `
+            <div class="footer-actions-group">
+                <button class="complete-btn" id="btn-action-complete">✔ Mark as completed</button>
+                <button class="btn-secondary" id="btn-action-untrack">Untrack</button>
+            </div>
+        `;
+    } else if (status === 'completed') {
+        actionButtonsHtml = `<button class="btn-secondary" id="btn-action-restore">Reopen Quest</button>`;
+    }
 
     questDetailsEl.innerHTML = `
         <div>
@@ -87,9 +120,9 @@ function renderQuestDetails() {
 
         <div class="details-footer">
             <div class="quest-category">${current.category}</div>
-            <button class="track-btn" id="track-btn">
-                ${current.isTracked ? "Untrack" : "Track"}
-            </button>
+            <div style="justify-self: center;">
+                ${actionButtonsHtml}
+            </div>
             <div class="quest-timer-details">
                 <div>Deadline: ${formattedDeadline}</div>
                 <div>Time left: ${timeLeftStr}</div>
@@ -97,11 +130,46 @@ function renderQuestDetails() {
         </div>
     `;
 
-    document.getElementById("track-btn").onclick = () => {
-        current.isTracked = !current.isTracked;
-        saveQuestsToFile(quests);
-        renderQuestDetails();
-    };
+    const btnTrack = document.getElementById("btn-action-track");
+    const btnComplete = document.getElementById("btn-action-complete");
+    const btnUntrack = document.getElementById("btn-action-untrack");
+    const btnRestore = document.getElementById("btn-action-restore");
+
+    if (btnTrack) {
+        btnTrack.onclick = () => {
+            current.status = 'tracked';
+            saveQuestsToFile(quests);
+            renderQuestList();
+            renderQuestDetails();
+        };
+    }
+
+    if (btnComplete) {
+        btnComplete.onclick = () => {
+            current.status = 'completed';
+            saveQuestsToFile(quests);
+            renderQuestList();
+            renderQuestDetails();
+        };
+    }
+
+    if (btnUntrack) {
+        btnUntrack.onclick = () => {
+            current.status = 'untracked';
+            saveQuestsToFile(quests);
+            renderQuestList();
+            renderQuestDetails();
+        };
+    }
+
+    if (btnRestore) {
+        btnRestore.onclick = () => {
+            current.status = 'untracked';
+            saveQuestsToFile(quests);
+            renderQuestList();
+            renderQuestDetails();
+        };
+    }
 
     const editMenuBtn = document.getElementById("edit-menu-btn");
     const editDropdown = document.getElementById("edit-dropdown");
@@ -417,7 +485,7 @@ function renderQuestCreateForm(questToEdit = null) {
                 description: description,
                 category: category,
                 deadline: deadline,
-                isTracked: false
+                status: 'untracked'
             };
             quests.push(newQuest);
             selectedQuestId = newQuest.id;
