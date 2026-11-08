@@ -16,26 +16,38 @@ let categoryIcons = {};
 let selectedQuestId = 1;
 let isTimerUpdatingAllowed = true;
 let activeFilterCategories = [];
-let filterMode = 'OR'
+let filterMode = 'OR';
+let searchQuery = '';
 
 // DOM elements
 const questListEl = document.getElementById("quest-items-list");
 const questDetailsEl = document.getElementById("quest-details");
+const searchInputEl = document.getElementById("search-input");
 
 // Filtering quests
 function getFilteredQuests() {
-    if (activeFilterCategories.length === 0) {
-        return quests;
+    let result = quests;
+
+    if (activeFilterCategories.length > 0) {
+        result = result.filter(q => {
+            const questCategories = q.categories || [];
+            if (filterMode === 'AND') {
+                return activeFilterCategories.every(category => questCategories.includes(category));
+            } else {
+                return activeFilterCategories.some(category => questCategories.includes(category));
+            }
+        });
     }
 
-    return quests.filter(q => {
-        const questCategories = q.categories || [];
-        if (filterMode === 'AND') {
-            return activeFilterCategories.every(category => questCategories.includes(category));
-        } else {
-            return activeFilterCategories.some(category => questCategories.includes(category));
-        }
-    });
+    if (searchQuery) {
+        result = result.filter(q => {
+            const titleMatch = q.title && q.title.toLowerCase().includes(searchQuery);
+            const descriptionMatch = q.description && q.description.toLowerCase().includes(searchQuery);
+            return titleMatch || descriptionMatch;
+        });
+    }
+
+    return result;
 }
 
 // Sorting quests
@@ -583,6 +595,14 @@ if (quests.length > 0) {
 
 renderQuestList();
 renderQuestDetails();
+
+// Event listener for search input
+if (searchInputEl) {
+    searchInputEl.addEventListener('input', (e) => {
+        searchQuery = e.target.value.toLowerCase().trim();
+        renderQuestList();
+    });
+}
 
 // Updating timers every minute
 setInterval(() => {
