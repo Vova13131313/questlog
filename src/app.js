@@ -24,7 +24,21 @@ const questDetailsEl = document.getElementById("quest-details");
 function getSortedQuests() {
     const priority = { 'tracked': 1, 'untracked': 2, 'completed': 3 };
     return [...quests].sort((a, b) => {
-        return priority[a.status] - priority[b.status];
+        const statusA = a.status || 'untracked';
+        const statusB = b.status || 'untracked';
+        
+        if (priority[statusA] !== priority[statusB]) {
+            return priority[statusA] - priority[statusB];
+        }
+
+        if (!a.deadline && !b.deadline) return 0;
+        if (!a.deadline) return 1;
+        if (!b.deadline) return -1;
+
+        const dateA = new Date(a.deadline).getTime();
+        const dateB = new Date(b.deadline).getTime();
+
+        return dateA - dateB;
     });
 }
 
