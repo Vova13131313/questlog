@@ -98,7 +98,7 @@ body {
     color: #fff;
 }
 
-/* Dropdown menu */
+/* Add dropdown menu */
 .dropdown-container {
     position: relative;
     display: inline-block;
@@ -145,6 +145,61 @@ body {
 
 .dropdown-icon {
     font-size: 16px;
+}
+
+/* Filter dropdown menu */
+.filter-dropdown-header {
+    padding: 8px;
+    border-bottom: 1px solid var(--border-gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.filter-dropdown-menu {
+    right: 0;
+    left: auto;
+    min-width: 200px;
+}
+
+.filter-mode-switch {
+    display: flex;
+    gap: 8px;
+}
+
+.filter-mode-switch .btn-secondary.active {
+    border-color: var(--gold);
+    color: var(--gold);
+    background: rgba(243, 223, 109, 0.2);
+    font-weight: bold;
+}
+
+.filter-categories-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.filter-categories-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.filter-categories-list::-webkit-scrollbar-track {
+    background: rgba(10, 10, 10, 0.5);
+    border-radius: 4px;
+}
+
+.filter-categories-list::-webkit-scrollbar-thumb {
+    background: var(--gold-dim);
+    border-radius: 4px;
+    border: 1px solid var(--border-gold);
+}
+
+.filter-categories-list::-webkit-scrollbar-thumb:hover {
+    background: var(--gold);
 }
 
 /* Search */

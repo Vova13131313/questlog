@@ -15,15 +15,35 @@ let quests = [];
 let categoryIcons = {};
 let selectedQuestId = 1;
 let isTimerUpdatingAllowed = true;
+let activeFilterCategories = [];
+let filterMode = 'OR'
 
 // DOM elements
 const questListEl = document.getElementById("quest-items-list");
 const questDetailsEl = document.getElementById("quest-details");
 
+// Filtering quests
+function getFilteredQuests() {
+    if (activeFilterCategories.length === 0) {
+        return quests;
+    }
+
+    return quests.filter(q => {
+        const questCategories = q.categories || [];
+        if (filterMode === 'AND') {
+            return activeFilterCategories.every(category => questCategories.includes(category));
+        } else {
+            return activeFilterCategories.some(category => questCategories.includes(category));
+        }
+    });
+}
+
 // Sorting quests
 function getSortedQuests() {
     const priority = { 'tracked': 1, 'untracked': 2, 'completed': 3 };
-    return [...quests].sort((a, b) => {
+    const filteredQuests = getFilteredQuests();
+
+    return [...filteredQuests].sort((a, b) => {
         const statusA = a.status || 'untracked';
         const statusB = b.status || 'untracked';
         
@@ -46,6 +66,17 @@ function getSortedQuests() {
 function renderQuestList() {
     questListEl.innerHTML = "";
     const sortedQuests = getSortedQuests();
+
+    if (sortedQuests.length > 0) {
+        const isSelectedVisible = sortedQuests.some(q => String(q.id) === String(selectedQuestId));
+        if (!isSelectedVisible) {
+            selectedQuestId = sortedQuests[0].id;
+            renderQuestDetails();
+        }
+    } else {
+        selectedQuestId = null;
+        renderQuestDetails();
+    }
 
     sortedQuests.forEach(q => {
         const status = q.status;
@@ -561,7 +592,7 @@ setInterval(() => {
     }
 }, 60000)
 
-// Dropdown menu
+// Add dropdown menu
 const addBtn = document.getElementById("add-btn");
 const addDropdown = document.getElementById("add-dropdown");
 const btnCreateCategory = document.getElementById("btn-create-category");
@@ -587,6 +618,101 @@ btnCreateQuest.onclick = () => {
     addDropdown.classList.remove("show");
     renderQuestCreateForm();
 };
+
+// Filter dropdown menu
+const filterBtn = document.getElementById("filter-btn");
+const filterDropdown = document.getElementById("filter-dropdown");
+
+function renderFilterDropdown() {
+    if (!filterDropdown) return;
+
+    const categoryNames = Object.keys(categoryIcons).sort((a, b) => a.localeCompare(b));
+    let categoriesCheckboxesHtml = "";
+
+    if (categoryNames.length === 0) {
+        categoriesCheckboxesHtml = `<div style="color: var(--text-muted); font-size: 13px; padding: 8px;">No categories created</div>`;
+    } else {
+        categoryNames.forEach(category => {
+            const isChecked = activeFilterCategories.includes(category) ? "checked" : "";
+            categoriesCheckboxesHtml += `
+                <label class="category-checkbox-label">
+                    <input type="checkbox" name="filter-categories" value="${category}" ${isChecked}>
+                    <span>${categoryIcons[category] || ''} ${category}</span>
+                </label>
+            `;
+        });
+    }
+
+    filterDropdown.innerHTML = `
+        <div class="filter-dropdown-header">
+            <div class="filter-mode-switch">
+                <button class="btn-secondary ${filterMode === 'OR' ? 'active' : ''}" id="btn-mode-or" style="padding: 2px 8px; font-size: 11px;">OR</button>
+                <button class="btn-secondary ${filterMode === 'AND' ? 'active' : ''}" id="btn-mode-and" style="padding: 2px 8px; font-size: 11px;">AND</button>
+            </div>
+        </div>
+        <div class="filter-categories-list">
+            ${categoriesCheckboxesHtml}
+        </div>
+    `;
+
+    const btnModeOr = document.getElementById("btn-mode-or");
+    const btnModeAnd = document.getElementById("btn-mode-and");
+
+    if (btnModeOr) {
+        btnModeOr.onclick = (e) => {
+            e.stopPropagation();
+            if (filterMode !== 'OR') {
+                filterMode = 'OR';
+                renderFilterDropdown();
+                renderQuestList();
+            }
+        };
+    }
+
+    if (btnModeAnd) {
+        btnModeAnd.onclick = (e) => {
+            e.stopPropagation();
+            if (filterMode !== 'AND') {
+                filterMode = 'AND';
+                renderFilterDropdown();
+                renderQuestList();
+            }
+        };
+    }
+
+    const checkboxes = filterDropdown.querySelectorAll('input[name="filter-categories"]');
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', (e) => {
+            const val = e.target.value;
+            if (e.target.checked) {
+                if (!activeFilterCategories.includes(val)) {
+                    activeFilterCategories.push(val);
+                }
+            } else {
+                activeFilterCategories = activeFilterCategories.filter(category => category !== val);
+            }
+            renderQuestList();
+        });
+    });
+}
+
+if (filterBtn && filterDropdown) {
+    filterBtn.onclick = (e) => {
+        e.stopPropagation();
+        if (addDropdown) addDropdown.classList.remove("show");
+
+        const isShown = filterDropdown.classList.toggle("show");
+        if (isShown) {
+            renderFilterDropdown();
+        }
+    };
+
+    document.addEventListener("click", (e) => {
+        if (filterDropdown.classList.contains("show") && !filterDropdown.contains(e.target) && e.target !== filterBtn) {
+            filterDropdown.classList.remove("show");
+        }
+    });
+}
 
 // Handle Escape key to close the window
 if (window.require) {
