@@ -49,7 +49,8 @@ function renderQuestList() {
 
     sortedQuests.forEach(q => {
         const status = q.status;
-        const iconVal = categoryIcons[q.category] || "?";
+        const firstCategory = (Array.isArray(q.categories) && q.categories.length > 0) ? q.categories[0] : "";
+        const iconVal = categoryIcons[firstCategory] || "?";
         const iconHtml = (iconVal.startsWith('data:') || iconVal.includes('.'))
             ? `<img src="${iconVal}" style="width: 28px; height: 28px; object-fit: contain;">`
             : iconVal;
@@ -92,6 +93,9 @@ function renderQuestDetails() {
     }
 
     const status = current.status;
+    const categoriesList = (Array.isArray(current.categories) && current.categories.length > 0)
+        ? current.categories.join(", ")
+        : "No category";
     const formattedDeadline = formatDeadlineDisplay(current.deadline);
     const timeLeftHtml = status === 'completed' ? '' : `<div>Time left: ${getFormattedTimeLeft(current.deadline)}</div>`;
 
@@ -133,7 +137,7 @@ function renderQuestDetails() {
         </div>
 
         <div class="details-footer">
-            <div class="quest-category">${current.category}</div>
+            <div class="quest-category">${categoriesList}</div>
             <div style="justify-self: center;">
                 ${actionButtonsHtml}
             </div>
@@ -392,13 +396,21 @@ function renderQuestCreateForm(questToEdit = null) {
     isTimerUpdatingAllowed = false;
 
     const categoryNames = Object.keys(categoryIcons);
-    let categoryOptionsHtml = "";
+    let categoriesCheckboxesHtml = "";
+
+    const currentCategories = (questToEdit && Array.isArray(questToEdit.categories)) ? questToEdit.categories : [];
 
     if (categoryNames.length === 0) {
-        categoryOptionsHtml = `<option value="">No categories created</option>`;
+        categoriesCheckboxesHtml = `<div style="color: var(--text-muted); font-size: 13px;">No categories created</div>`;
     } else {
         categoryNames.forEach(category => {
-            categoryOptionsHtml += `<option value="${category}">${category}</option>`;
+            const isChecked = currentCategories.includes(category) ? "checked" : "";
+            categoriesCheckboxesHtml += `
+                <label class="category-checkbox-label">
+                    <input type="checkbox" name="quest-categories" value="${category}" ${isChecked}>
+                    <span>${categoryIcons[category] || ''} ${category}</span>
+                </label>
+            `;
         });
     }
 
@@ -429,10 +441,10 @@ function renderQuestCreateForm(questToEdit = null) {
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                         <div class="form-group">
-                            <label class="form-label">Category</label>
-                            <select id="quest-category-select" class="form-input">
-                                ${categoryOptionsHtml}
-                            </select>
+                            <label class="form-label">Categories (select one or more)</label>
+                            <div class="categories-checkbox-group">
+                                ${categoriesCheckboxesHtml}
+                            </div>
                         </div>
 
                         <div class="form-group">
@@ -468,7 +480,8 @@ function renderQuestCreateForm(questToEdit = null) {
     document.getElementById("save-quest-btn").onclick = () => {
         const title = document.getElementById("quest-title-input").value.trim();
         const description = document.getElementById("quest-description-input").value.trim();
-        const category = document.getElementById("quest-category-select").value;
+        const selectedCheckboxes = document.querySelectorAll('input[name="quest-categories"]:checked');
+        const selectedCategories = Array.from(selectedCheckboxes).map(cb => cb.value);
         const deadline = document.getElementById("quest-deadline-input").value;
 
         if (!title) {
@@ -476,8 +489,8 @@ function renderQuestCreateForm(questToEdit = null) {
             return;
         }
 
-        if (!category) {
-            showError("Create a category first");
+        if (selectedCategories.length === 0) {
+            showError("Select at least one category");
             return;
         }
 
@@ -489,7 +502,7 @@ function renderQuestCreateForm(questToEdit = null) {
         if (questToEdit) {
             questToEdit.title = title;
             questToEdit.description = description;
-            questToEdit.category = category;
+            questToEdit.categories = selectedCategories;
             questToEdit.deadline = deadline;
             selectedQuestId = questToEdit.id;
         } else {
@@ -497,7 +510,7 @@ function renderQuestCreateForm(questToEdit = null) {
                 id: Date.now(),
                 title: title,
                 description: description,
-                category: category,
+                categories: selectedCategories,
                 deadline: deadline,
                 status: 'untracked'
             };
@@ -512,8 +525,8 @@ function renderQuestCreateForm(questToEdit = null) {
 }
 
 // Initialization
-loadCategoriesFromFile();
-loadQuestsFromFile();
+categoryIcons = loadCategoriesFromFile() || {};
+quests = loadQuestsFromFile() || [];
 
 if (quests.length > 0 && !quests.some(q => q.id === selectedQuestId)) {
     selectedQuestId = quests[0].id;
