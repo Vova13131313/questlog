@@ -66,7 +66,7 @@ function renderQuestList() {
         }
 
         const li = document.createElement("li");
-        li.className = `quest-card ${status} ${q.id === selectedQuestId ? 'selected' : ''}`;
+        li.className = `quest-card ${status} ${String(q.id) === String(selectedQuestId) ? 'selected' : ''}`;
         li.innerHTML = `
             <div class="quest-card-icon">${iconHtml}</div>
             <div class="quest-card-info">
@@ -86,7 +86,7 @@ function renderQuestList() {
 // Function to render the quest details
 function renderQuestDetails() {
     isTimerUpdatingAllowed = true;
-    const current = quests.find(q => q.id === selectedQuestId);
+    const current = quests.find(q => String(q.id) === String(selectedQuestId));
     if (!current) {
         questDetailsEl.innerHTML = `<div style="text-align: center; color: var(--text-muted); margin-top: 50px;">Select a quest or create a new one</div>`;
         return;
@@ -395,10 +395,11 @@ function renderCategoryCreateForm() {
 function renderQuestCreateForm(questToEdit = null) {
     isTimerUpdatingAllowed = false;
 
-    const categoryNames = Object.keys(categoryIcons);
+    const categoryNames = Object.keys(categoryIcons).sort((a, b) => a.localeCompare(b));
     let categoriesCheckboxesHtml = "";
-
-    const currentCategories = (questToEdit && Array.isArray(questToEdit.categories)) ? questToEdit.categories : [];
+    let currentCategories = (questToEdit && Array.isArray(questToEdit.categories))
+        ? [...questToEdit.categories]
+        : [];
 
     if (categoryNames.length === 0) {
         categoriesCheckboxesHtml = `<div style="color: var(--text-muted); font-size: 13px;">No categories created</div>`;
@@ -471,6 +472,20 @@ function renderQuestCreateForm(questToEdit = null) {
         errorMsg.style.display = "block";
     }
 
+    const checkboxes = questDetailsEl.querySelectorAll('input[name="quest-categories"]');
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', (e) => {
+            const val = e.target.value;
+            if (e.target.checked) {
+                if (!currentCategories.includes(val)) {
+                    currentCategories.push(val);
+                }
+            } else {
+                currentCategories = currentCategories.filter(category => category !== val);
+            }
+        });
+    });
+
     // Cancel
     document.getElementById("cancel-quest-btn").onclick = () => {
         renderQuestDetails();
@@ -480,8 +495,6 @@ function renderQuestCreateForm(questToEdit = null) {
     document.getElementById("save-quest-btn").onclick = () => {
         const title = document.getElementById("quest-title-input").value.trim();
         const description = document.getElementById("quest-description-input").value.trim();
-        const selectedCheckboxes = document.querySelectorAll('input[name="quest-categories"]:checked');
-        const selectedCategories = Array.from(selectedCheckboxes).map(cb => cb.value);
         const deadline = document.getElementById("quest-deadline-input").value;
 
         if (!title) {
@@ -489,7 +502,7 @@ function renderQuestCreateForm(questToEdit = null) {
             return;
         }
 
-        if (selectedCategories.length === 0) {
+        if (currentCategories.length === 0) {
             showError("Select at least one category");
             return;
         }
@@ -502,7 +515,7 @@ function renderQuestCreateForm(questToEdit = null) {
         if (questToEdit) {
             questToEdit.title = title;
             questToEdit.description = description;
-            questToEdit.categories = selectedCategories;
+            questToEdit.categories = currentCategories;
             questToEdit.deadline = deadline;
             selectedQuestId = questToEdit.id;
         } else {
@@ -510,7 +523,7 @@ function renderQuestCreateForm(questToEdit = null) {
                 id: Date.now(),
                 title: title,
                 description: description,
-                categories: selectedCategories,
+                categories: currentCategories,
                 deadline: deadline,
                 status: 'untracked'
             };
@@ -525,11 +538,16 @@ function renderQuestCreateForm(questToEdit = null) {
 }
 
 // Initialization
-categoryIcons = loadCategoriesFromFile() || {};
-quests = loadQuestsFromFile() || [];
+loadCategoriesFromFile();
+loadQuestsFromFile();
 
-if (quests.length > 0 && !quests.some(q => q.id === selectedQuestId)) {
-    selectedQuestId = quests[0].id;
+if (quests.length > 0) {
+    const hasSelected = quests.some(q => String(q.id) === String(selectedQuestId));
+    if (!hasSelected) {
+        selectedQuestId = quests[0].id;
+    }
+} else {
+    selectedQuestId = null;
 }
 
 renderQuestList();
