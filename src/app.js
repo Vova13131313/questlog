@@ -55,7 +55,7 @@ function renderQuestList() {
             : iconVal;
 
         const formattedDeadline = formatDeadlineDisplay(q.deadline);
-        const timeLeftStr = getFormattedTimeLeft(q.deadline);
+        const timeLeftStr = status === 'completed' ? '' : `; ${getFormattedTimeLeft(q.deadline)}`;
 
         let badgeHtml = "";
         if (status === 'tracked') {
@@ -70,7 +70,7 @@ function renderQuestList() {
             <div class="quest-card-icon">${iconHtml}</div>
             <div class="quest-card-info">
                 <div class="quest-card-title">${q.title} ${badgeHtml}</div>
-                <div class="quest-card-timer">${formattedDeadline}; ${timeLeftStr}</div>
+                <div class="quest-card-timer">${formattedDeadline}${timeLeftStr}</div>
             </div>
         `;
         li.onclick = () => {
@@ -93,7 +93,7 @@ function renderQuestDetails() {
 
     const status = current.status;
     const formattedDeadline = formatDeadlineDisplay(current.deadline);
-    const timeLeftStr = getFormattedTimeLeft(current.deadline);
+    const timeLeftHtml = status === 'completed' ? '' : `<div>Time left: ${getFormattedTimeLeft(current.deadline)}</div>`;
 
     let actionButtonsHtml = "";
     if (status === 'untracked') {
@@ -139,7 +139,7 @@ function renderQuestDetails() {
             </div>
             <div class="quest-timer-details">
                 <div>Deadline: ${formattedDeadline}</div>
-                <div>Time left: ${timeLeftStr}</div>
+                ${timeLeftHtml}
             </div>
         </div>
     `;
