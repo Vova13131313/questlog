@@ -8,8 +8,9 @@ const {
 } = require('./utils');
 
 // Create category form
-function renderCategoryCreateForm() {
-    isTimerUpdatingAllowed = false;
+function renderCategoryCreateForm(context) {
+    const { questDetailsEl, categoryIcons, setTimerUpdatingAllowed, renderQuestDetails } = context;
+    setTimerUpdatingAllowed(false);
 
     questDetailsEl.innerHTML = `
         <div class="form-container">
@@ -40,7 +41,7 @@ function renderCategoryCreateForm() {
 
                     <div class="form-group" id="group-emoji">
                         <label class="form-label">Icon (emoji)</label>
-                        <input type="text" id="category-emoji-input" class="form-input" placeholder="📖, ⚔️, 💼..." maxlength="4">
+                        <input type="text" id="category-emoji-input" class="form-input" placeholder="🕮, ⚔..." maxlength="4">
                     </div>
 
                     <div class="form-group" id="group-file" style="display: none">
@@ -149,8 +150,18 @@ function renderCategoryCreateForm() {
 }
 
 // Create quest form
-function renderQuestCreateForm(questToEdit = null) {
-    isTimerUpdatingAllowed = false;
+function renderQuestCreateForm(context, questToEdit = null) {
+    const {
+        questDetailsEl,
+        categoryIcons,
+        quests,
+        setTimerUpdatingAllowed,
+        setSelectedQuestId,
+        renderQuestList,
+        renderQuestDetails
+    } = context;
+
+    setTimerUpdatingAllowed(false);
 
     const categoryNames = Object.keys(categoryIcons).sort((a, b) => a.localeCompare(b));
     let categoriesCheckboxesHtml = "";
@@ -274,7 +285,7 @@ function renderQuestCreateForm(questToEdit = null) {
             questToEdit.description = description;
             questToEdit.categories = currentCategories;
             questToEdit.deadline = deadline;
-            selectedQuestId = questToEdit.id;
+            setSelectedQuestId(questToEdit.id);
         } else {
             const newQuest = {
                 id: Date.now(),
@@ -285,7 +296,7 @@ function renderQuestCreateForm(questToEdit = null) {
                 status: 'untracked'
             };
             quests.push(newQuest);
-            selectedQuestId = newQuest.id;
+            setSelectedQuestId(questToEdit.id);
         }
 
         saveQuestsToFile(quests);

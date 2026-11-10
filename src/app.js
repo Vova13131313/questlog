@@ -31,6 +31,26 @@ const questListEl = document.getElementById("quest-items-list");
 const questDetailsEl = document.getElementById("quest-details");
 const searchInputEl = document.getElementById("search-input");
 
+function setTimerUpdatingAllowed(value) {
+    isTimerUpdatingAllowed = value;
+}
+
+function setSelectedQuestId(id) {
+    selectedQuestId = id;
+}
+
+function getFormContext() {
+    return {
+        questDetailsEl,
+        categoryIcons,
+        quests,
+        setTimerUpdatingAllowed,
+        setSelectedQuestId,
+        renderQuestList,
+        renderQuestDetails
+    };
+}
+
 // Function to render the quest list
 function renderQuestList() {
     questListEl.innerHTML = "";
@@ -209,7 +229,7 @@ function renderQuestDetails() {
 
     btnEditOption.onclick = () => {
         editDropdown.classList.remove("show");
-        renderQuestCreateForm(current);
+        renderQuestCreateForm(getFormContext(), current);
     };
 
     btnDeleteOption.onclick = (e) => {
@@ -301,12 +321,12 @@ document.addEventListener("click", (e) => {
 
 btnCreateCategory.onclick = () => {
     addDropdown.classList.remove("show");
-    renderCategoryCreateForm();
+    renderCategoryCreateForm(getFormContext());
 };
 
 btnCreateQuest.onclick = () => {
     addDropdown.classList.remove("show");
-    renderQuestCreateForm();
+    renderQuestCreateForm(getFormContext());
 };
 
 // Filter dropdown menu
