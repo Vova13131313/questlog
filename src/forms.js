@@ -8,9 +8,24 @@ const {
 } = require('./utils');
 
 // Create category form
-function renderCategoryCreateForm(context) {
-    const { questDetailsEl, categoryIcons, setTimerUpdatingAllowed, renderQuestDetails } = context;
+function renderCategoryCreateForm(context, categoryToEdit = null, returnToSettings = false) {
+    const {
+        questDetailsEl,
+        categoryIcons,
+        quests,
+        setTimerUpdatingAllowed,
+        renderQuestDetails,
+        renderQuestList
+    } = context;
+
     setTimerUpdatingAllowed(false);
+
+    const initialName = categoryToEdit || "";
+    const initialIcon = categoryToEdit ? (categoryIcons[categoryToEdit] || "") : "";
+    const isFileIcon = initialIcon.startsWith('data:') || initialIcon.includes('.');
+
+    const formTitle = categoryToEdit ? "Edit Category" : "New Category";
+    let iconFileResult = isFileIcon ? initialIcon : null;
 
     questDetailsEl.innerHTML = `
         <div class="form-container">
@@ -24,31 +39,33 @@ function renderCategoryCreateForm(context) {
                 <div class="details-body" style="display: flex; flex-direction: column; gap: 20px;">
                     <div class="form-group">
                         <label class="form-label">Category name</label>
-                        <input type="text" id="category-name-input" class="form-input" placeholder="Work, study, hobby etc...">
+                        <input type="text" id="category-name-input" class="form-input" value="${initialName}" placeholder="Work, study, hobby etc...">
                     </div>
 
                     <div class="form-group">
                         <label class="form-label">Icon type</label>
                         <div class="icon-type-selector">
-                            <label class="radio-btn-label active" id="label-emoji">
-                                <input type="radio" name="icon-type" value="emoji" checked id="type-emoji"> Symbol / Emoji
+                            <label class="radio-btn-label ${!isFileIcon ? 'active' : ''}" id="label-emoji">
+                                <input type="radio" name="icon-type" value="emoji" ${!isFileIcon ? 'checked' : ''} id="type-emoji"> Symbol / Emoji
                             </label>
-                            <label class="radio-btn-label" id="label-file">
-                                <input type="radio" name="icon-type" value="file" id="type-file"> Image
+                            <label class="radio-btn-label ${isFileIcon ? 'active' : ''}" id="label-file">
+                                <input type="radio" name="icon-type" value="file" ${isFileIcon ? 'checked' : ''} id="type-file"> Image
                             </label>
                         </div>
                     </div>
 
-                    <div class="form-group" id="group-emoji">
+                    <div class="form-group" id="group-emoji" style="display: ${!isFileIcon ? 'flex' : 'none'}">
                         <label class="form-label">Icon (emoji)</label>
-                        <input type="text" id="category-emoji-input" class="form-input" placeholder="🕮, ⚔..." maxlength="4">
+                        <input type="text" id="category-emoji-input" class="form-input" value="${!isFileIcon ? initialIcon : ''}" placeholder="🕮, ⚔..." maxlength="4">
                     </div>
 
-                    <div class="form-group" id="group-file" style="display: none">
+                    <div class="form-group" id="group-file" style="display: ${isFileIcon ? 'flex' : 'none'}">
                         <label class="form-label">Image file</label>
                         <div class="file-input-wrapper">
                             <div class="form-input file-input-custom">
-                                <span id="file-name-display" class="file-name-text">Choose image file...</span>
+                                <span id="file-name-display" class="file-name-text" style="${isFileIcon ? 'color: var(--gold);' : ''}">
+                                    ${isFileIcon ? 'Image loaded' : 'Choose image file...'}
+                                </span>
                                 <span>📁</span>
                             </div>
                             <input type="file" id="category-file-input" accept="image/*" class="file-input-hidden">
@@ -86,6 +103,14 @@ function renderCategoryCreateForm(context) {
         errorMsg.style.display = "none";
     }
 
+    function handleBack() {
+        if (returnToSettings) {
+            renderSettingsForm(context);
+        } else {
+            renderQuestDetails();
+        }
+    }
+
     typeEmoji.onchange = () => {
         groupEmoji.style.display = "flex";
         groupFile.style.display = "none";
@@ -105,12 +130,18 @@ function renderCategoryCreateForm(context) {
             fileNameDisplay.textContent = fileInput.files[0].name;
             fileNameDisplay.style.color = "var(--gold)";
             hideError();
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                iconFileResult = e.target.result;
+            };
+            reader.readAsDataURL(fileInput.files[0]);
         }
     }
 
     // Cancel
     document.getElementById("cancel-category-btn").onclick = () => {
-        renderQuestDetails();
+        handleBack();
     }
 
     // Save
@@ -121,31 +152,37 @@ function renderCategoryCreateForm(context) {
             return
         }
 
+        let newIcon = "";
+
         if (typeEmoji.checked) {
             const emoji = document.getElementById("category-emoji-input").value.trim();
-            if (emoji) {
-                categoryIcons[name] = emoji;
-                saveCategoriesToFile(categoryIcons);
-                renderQuestDetails();
-            } else {
+            if (!emoji) {
                 showError("Enter symbol / emoji");
+                return;
             }
+            newIcon = emoji;
+        } else if (typeFile.checked) {
+            if (!iconFileResult) {
+                showError("Choose image file");
+                return;
+            }
+            newIcon = iconFileResult;
         }
 
-        if (typeFile.checked) {
-            const fileInput = document.getElementById("category-file-input");
-            if (fileInput.files && fileInput.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    categoryIcons[name] = e.target.result;
-                    saveCategoriesToFile(categoryIcons);
-                    renderQuestDetails();
-                };
-                reader.readAsDataURL(fileInput.files[0]);
-            } else {
-                showError("Choose image file")
-            }
+        if (categoryToEdit && categoryToEdit !== name) {
+            delete categoryIcons[categoryToEdit];
+            quests.forEach(q => {
+                if (Array.isArray(q.categories)) {
+                    q.categories = q.categories.map(c => c === categoryToEdit ? name : c);
+                }
+            });
+            saveQuestsToFile(quests);
         }
+
+        categoryIcons[name] = newIcon;
+        saveCategoriesToFile(categoryIcons);
+        renderQuestList();
+        handleBack();
     };
 }
 
@@ -306,8 +343,43 @@ function renderQuestCreateForm(context, questToEdit = null) {
 }
 
 function renderSettingsForm(context) {
-    const { questDetailsEl, setTimerUpdatingAllowed, renderQuestDetails } = context;
+    const {
+        questDetailsEl,
+        categoryIcons,
+        quests,
+        setTimerUpdatingAllowed,
+        renderQuestDetails,
+        renderQuestList
+    } = context;
+
     setTimerUpdatingAllowed(false);
+
+    const categoryNames = Object.keys(categoryIcons).sort((a, b) => a.localeCompare(b));
+    let categoriesListHtml = "";
+
+    if (categoryNames.length === 0) {
+        categoriesListHtml = `<div style="text-align: center; color: var(--text-muted); padding: 20px 0;">No categories created yet</div>`
+    } else {
+        categoryNames.forEach(category => {
+            const iconVal = categoryIcons[category] || "?";
+            const iconHtml = (iconVal.startsWith('data:') || iconVal.includes('.'))
+                ? `<img src="${iconVal}" style="width: 22px; height 22px; object-fit: contain;">`
+                : iconVal;
+
+            categoriesListHtml += `
+                <div class="settings-category-item">
+                    <div class="settings-category-info">
+                        <div class="settings-category-icon">${iconHtml}</div>
+                        <span>${category}</span>
+                    </div>
+                    <div class="settings-category-actions">
+                        <button class="btn-icon-action edit-action" data-category="${category}" title="Edit category">✏️</button>
+                        <button class="btn-icon-action delete-action" data-category="${category}" title="Delete category">🗑️</button>
+                    </div>
+                </div>
+            `;
+        });
+    }
 
     questDetailsEl.innerHTML = `
         <div class="form-container">
@@ -319,7 +391,12 @@ function renderSettingsForm(context) {
                 </div>
 
                 <div class="details-body" style="display: flex; flex-direction: column; gap: 20px;">
-
+                    <div class="form-group settings-category-manager">
+                        <label class="form-label">Categories</label>
+                        <div class="settings-category-list">
+                            ${categoriesListHtml}
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -328,6 +405,34 @@ function renderSettingsForm(context) {
             </div>
         </div>
     `;
+
+    const editBtns = questDetailsEl.querySelectorAll(".edit-action");
+    editBtns.forEach(btn => {
+        btn.onclick = () => {
+            const categoryName = btn.getAttribute("data-category");
+            renderCategoryCreateForm(context, categoryName, true);
+        };
+    });
+
+    const deleteBtns = questDetailsEl.querySelectorAll(".delete-action");
+    deleteBtns.forEach(btn => {
+        btn.onclick = () => {
+            const categoryName = btn.getAttribute("data-category");
+
+            delete categoryIcons[categoryName];
+            saveCategoriesToFile(categoryIcons);
+
+            quests.forEach(q => {
+                if (Array.isArray(q.categories)) {
+                    q.categories = q.categories.filter(c => c !== categoryName);
+                }
+            });
+            saveQuestsToFile(quests);
+
+            renderQuestList();
+            renderSettingsForm(context);
+        };
+    });
 
     document.getElementById("close-settings-btn").onclick = () => {
         renderQuestDetails();
