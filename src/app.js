@@ -347,10 +347,15 @@ function renderFilterDropdown() {
     } else {
         categoryNames.forEach(category => {
             const isChecked = activeFilterCategories.includes(category) ? "checked" : "";
+            const iconVal = categoryIcons[category] || "";
+            const iconHtml = (iconVal.startsWith('data:') || iconVal.includes('.'))
+                ? `<img src="${iconVal}" style="width: 18px; height: 18px; object-fit: contain">`
+                : iconVal;
+            
             categoriesCheckboxesHtml += `
                 <label class="category-checkbox-label">
                     <input type="checkbox" name="filter-categories" value="${category}" ${isChecked}>
-                    <span>${categoryIcons[category] || ''} ${category}</span>
+                    <span style="display: inline-flex; align-items: center; gap: 6px;">${iconHtml} ${category}</span>
                 </label>
             `;
         });
