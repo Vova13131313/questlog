@@ -523,11 +523,30 @@ input[type="datetime-local"].form-input {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    max-height: 100px;
+    max-height: 200px;
     overflow-y: auto;
     padding: 6px;
     border: 1.5px solid var(--border-gold);
     border-radius: 8px;
+}
+
+.categories-checkbox-group::-webkit-scrollbar {
+    width: 6px;
+}
+
+.categories-checkbox-group::-webkit-scrollbar-track {
+    background: rgba(10, 10, 10, 0.5);
+    border-radius: 4px;
+}
+
+.categories-checkbox-group::-webkit-scrollbar-thumb {
+    background: var(--gold-dim);
+    border-radius: 4px;
+    border: 1px solid var(--border-gold);
+}
+
+.categories-checkbox-group::-webkit-scrollbar-thumb:hover {
+    background: var(--gold);
 }
 
 .category-checkbox-label {
