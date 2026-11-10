@@ -15,7 +15,8 @@ const {
 
 const {
     renderCategoryCreateForm,
-    renderQuestCreateForm
+    renderQuestCreateForm,
+    renderSettingsForm
 } = require('./src/forms');
 
 let quests = [];
@@ -422,6 +423,17 @@ if (filterBtn && filterDropdown) {
             filterDropdown.classList.remove("show");
         }
     });
+}
+
+// Settings button
+const settingsBtn = document.getElementById("settings-btn");
+
+if (settingsBtn) {
+    settingsBtn.onclick = () => {
+        if (addDropdown) addDropdown.classList.remove("show");
+        if (filterDropdown) filterDropdown.classList.remove("show");
+        renderSettingsForm(getFormContext());
+    };
 }
 
 // Handle Escape key to close the window

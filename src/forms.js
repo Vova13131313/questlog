@@ -305,7 +305,37 @@ function renderQuestCreateForm(context, questToEdit = null) {
     };
 }
 
+function renderSettingsForm(context) {
+    const { questDetailsEl, setTimerUpdatingAllowed, renderQuestDetails } = context;
+    setTimerUpdatingAllowed(false);
+
+    questDetailsEl.innerHTML = `
+        <div class="form-container">
+            <div>
+                <div class="details-header">
+                    <div class="header-spacer"></div>
+                    <h2 class="details-title">Settings</h2>
+                    <div class="header-spacer"></div>
+                </div>
+
+                <div class="details-body" style="display: flex; flex-direction: column; gap: 20px;">
+
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button class="btn-secondary" id="close-settings-btn" style="width: 200px;">Back</button>
+            </div>
+        </div>
+    `;
+
+    document.getElementById("close-settings-btn").onclick = () => {
+        renderQuestDetails();
+    };
+}
+
 module.exports = {
     renderCategoryCreateForm,
-    renderQuestCreateForm
+    renderQuestCreateForm,
+    renderSettingsForm
 };
