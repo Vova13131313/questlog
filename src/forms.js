@@ -359,6 +359,21 @@ function renderSettingsForm(context) {
 
     setTimerUpdatingAllowed(false);
 
+    const isElectron = window.require;
+    let autoStartHtml = "";
+
+    if (isElectron) {
+        autoStartHtml = `
+            <div class="form-group">
+                <label class="form-label">System</label>
+                <label class="category-checkbox-label" style="width: max-content; padding: 8px 14px;">
+                    <input type="checkbox" id="autostart-checkbox">
+                    <span>Start with Windows</span>
+                </label>
+            </div>
+        `;
+    }
+
     const categoryNames = Object.keys(categoryIcons).sort((a, b) => a.localeCompare(b));
     let categoriesListHtml = "";
 
@@ -396,6 +411,7 @@ function renderSettingsForm(context) {
                 </div>
 
                 <div class="details-body" style="display: flex; flex-direction: column; gap: 20px;">
+                    ${autoStartHtml}
                     <div class="form-group settings-category-manager">
                         <label class="form-label">Categories</label>
                         <div class="settings-category-list">
@@ -410,6 +426,21 @@ function renderSettingsForm(context) {
             </div>
         </div>
     `;
+
+    if (isElectron) {
+        const { ipcRenderer } = window.require('electron');
+        const autoStartCb = document.getElementById("autostart-checkbox");
+
+        if (autoStartCb) {
+            ipcRenderer.invoke('get-autostart').then(isEnabled => {
+                autoStartCb.checked = isEnabled;
+            });
+
+            autoStartCb.onchange = (e) => {
+                ipcRenderer.send('set-autostart', e.target.checked);
+            }
+        }
+    }
 
     const editBtns = questDetailsEl.querySelectorAll(".edit-action");
     editBtns.forEach(btn => {

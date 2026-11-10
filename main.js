@@ -4,6 +4,16 @@ const path = require('path');
 let mainWindow = null;
 let tray = null;
 
+ipcMain.handle('get-autostart', () => {
+    return app.getLoginItemSettings().openAtLogin;
+});
+
+ipcMain.on('set-autostart', (event, enable) => {
+    app.setLoginItemSettings({
+        openAtLogin: enable
+    });
+});
+
 function createWindow() {
     mainWindow = new BrowserWindow({
         frame: false,
