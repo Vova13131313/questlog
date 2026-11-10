@@ -296,7 +296,7 @@ function renderQuestCreateForm(context, questToEdit = null) {
                 status: 'untracked'
             };
             quests.push(newQuest);
-            setSelectedQuestId(questToEdit.id);
+            setSelectedQuestId(newQuest.id);
         }
 
         saveQuestsToFile(quests);

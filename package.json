@@ -5,7 +5,27 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
+    "dist": "electron-builder",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "build": {
+    "appId": "com.questlog.app",
+    "productName": "Questlog",
+    "files": [
+      "index.html",
+      "style.css",
+      "main.js",
+      "src/**/*",
+      "data/**/*",
+      "assets/**/*"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": ["portable", "nsis"],
+      "icon": "build/icon.ico"
+    }
   },
   "repository": {
     "type": "git",
@@ -20,6 +40,7 @@
   },
   "homepage": "https://github.com/Vova13131313/questlog#readme",
   "devDependencies": {
-    "electron": "^45.2.1"
+    "electron": "^45.2.1",
+    "electron-builder": "^26.18.0"
   }
 }

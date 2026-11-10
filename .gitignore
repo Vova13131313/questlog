@@ -12,6 +12,8 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Quests data file
-data/quests.json
-data/categories.json
+# Quests data files
+data/
+
+# Dist
+dist/

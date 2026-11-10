@@ -65,7 +65,9 @@ function renderQuestList() {
         }
     } else {
         selectedQuestId = null;
-        renderQuestDetails();
+        if (isTimerUpdatingAllowed) {
+            renderQuestDetails();
+        }
     }
 
     sortedQuests.forEach(q => {
@@ -272,8 +274,8 @@ function deleteQuest(questId) {
 }
 
 // Initialization
-loadCategoriesFromFile();
-loadQuestsFromFile();
+categoryIcons = loadCategoriesFromFile() || {};
+quests = loadQuestsFromFile() || [];
 
 if (quests.length > 0) {
     const hasSelected = quests.some(q => String(q.id) === String(selectedQuestId));

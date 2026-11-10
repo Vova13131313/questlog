@@ -1,17 +1,31 @@
 // Node.js modules
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
+
+// AppData path
+const userAppData = process.env.APPDATA ||
+    (process.platform === 'darwin'
+        ? path.join(os.homedir(), 'Library', 'Application Support')
+        : path.join(os.homedir(), '.config'));
+
+const DATA_DIR = path.join(userAppData, 'questlog', 'data');
+
+// Create directory if doesn't exist
+if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+}
 
 // Quests file path
-const QUESTS_PATH = path.join(__dirname, '../data/quests.json');
-const CATEGORIES_PATH = path.join(__dirname, '../data/categories.json');
+const QUESTS_PATH = path.join(DATA_DIR, 'quests.json');
+const CATEGORIES_PATH = path.join(DATA_DIR, 'categories.json');
 
 // Read categories from json
 function loadCategoriesFromFile() {
     try {
         if (fs.existsSync(CATEGORIES_PATH)) {
             const rawData = fs.readFileSync(CATEGORIES_PATH, 'utf-8');
-            categoryIcons = JSON.parse(rawData);
+            return JSON.parse(rawData);
         } else {
             const defaultCategories = {};
             saveCategoriesToFile(defaultCategories);
@@ -37,7 +51,7 @@ function loadQuestsFromFile() {
     try {
         if (fs.existsSync(QUESTS_PATH)) {
             const rawData = fs.readFileSync(QUESTS_PATH, 'utf-8');
-            quests = JSON.parse(rawData);
+            return JSON.parse(rawData);
         } else {
             const defaultQuests = [];
             saveQuestsToFile(defaultQuests);
@@ -45,7 +59,7 @@ function loadQuestsFromFile() {
         }
     } catch (error) {
         console.error("Error while reading quests.json: ", error);
-        quests = [];
+        return [];
     }
 }
 
