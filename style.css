@@ -86,17 +86,26 @@ body {
 }
 
 .icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background: transparent;
     border: none;
     color: var(--gold);
     font-size: 26px;
     cursor: pointer;
     transition: all 0.2s;
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    padding: 0;
+    line-height: 1;
 }
 
 .icon-btn:hover {
     transform: scale(1.15);
     color: #fff;
+    background: rgba(243, 223, 109, 0.15);
 }
 
 /* Add dropdown menu */
