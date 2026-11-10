@@ -1,6 +1,6 @@
 {
   "name": "questlog",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Quest Log Overlay",
   "main": "main.js",
   "scripts": {
